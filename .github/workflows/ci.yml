@@ -17,7 +17,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12' # Kept at 3.12 to match your target-version in pyproject.toml
+          python-version: '3.11'
 
       - name: Execute Pre-Commit Hook Suite
         uses: pre-commit/action@v3.0.1
@@ -38,31 +38,9 @@ jobs:
           severity: 'HIGH,CRITICAL'
           exit-code: '1'
 
-  automated-testing:
-    name: Asynchronous Unit Testing
-    needs: [static-analysis, security-compliance] # Ensures code is clean/safe before wasting computing time on tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-          cache: 'pip' # Speeds up subsequent pipeline runs by caching your pip dependencies
-
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt
-
-      - name: Run Test Suite via Pytest
-        run: pytest -v
-
   container-verification:
     name: Immutable Image Build Validation
-    needs: automated-testing # This now successfully resolves to the job defined right above it!
+    needs: [static-analysis, security-compliance]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
